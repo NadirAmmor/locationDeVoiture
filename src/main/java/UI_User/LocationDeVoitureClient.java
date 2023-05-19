@@ -12,6 +12,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -67,16 +70,16 @@ public class LocationDeVoitureClient extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(214, 214, 214)
+                .addGap(371, 371, 371)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 237, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(36, 36, 36)
+                .addGap(25, 25, 25)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addContainerGap(55, Short.MAX_VALUE))
         );
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
@@ -88,7 +91,15 @@ public class LocationDeVoitureClient extends javax.swing.JFrame {
             new String [] {
                 "id", "marque", "modele", "couleur"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
         jScrollPane1.setViewportView(jTable1);
 
         jComboBox1.addActionListener(new java.awt.event.ActionListener() {
@@ -97,14 +108,13 @@ public class LocationDeVoitureClient extends javax.swing.JFrame {
             }
         });
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         jComboBox2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBox2ActionPerformed(evt);
             }
         });
 
-        jButton1.setText("jButton1");
+        jButton1.setText("Reserve");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -153,7 +163,7 @@ public class LocationDeVoitureClient extends javax.swing.JFrame {
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGap(116, 116, 116)
                                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 206, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 216, Short.MAX_VALUE)))
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 550, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(82, 82, 82))
         );
@@ -181,7 +191,7 @@ public class LocationDeVoitureClient extends javax.swing.JFrame {
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(74, Short.MAX_VALUE))
+                .addContainerGap(98, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -189,27 +199,80 @@ public class LocationDeVoitureClient extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    int idUser = AuthClient.idSession; 
+    int id = (int) jTable1.getValueAt(jTable1.getSelectedRow(), 0);
+    String marque = (String) jTable1.getValueAt(jTable1.getSelectedRow(), 1);
+    String modele = (String) jTable1.getValueAt(jTable1.getSelectedRow(), 2);
+    String couleur = (String) jTable1.getValueAt(jTable1.getSelectedRow(), 3);
+    String date = jTextField1.getText();
+
+    String sql2 = "SELECT `nom` FROM `client` WHERE id = '" + idUser + "'";
+    String sql = "INSERT INTO `reservation` (`marqueVoiture`, `modeleVoiture`, `couleurVoiture`, `nomClient`, `date` ,`valide`) VALUES (?, ?, ?, ?, ?, '0')";
+
+    try {
+        Connection cnx = Singleton.getconn();
+        Statement stmt2 = cnx.createStatement();
+        PreparedStatement stmt = cnx.prepareStatement(sql);
+        ResultSet rs2 = stmt2.executeQuery(sql2);
+        if (rs2.next()) {
+            String nomDuClient = rs2.getString("nom");
+            stmt.setString(1, marque);
+            stmt.setString(2, modele);
+            stmt.setString(3, couleur);
+            stmt.setString(4, nomDuClient);
+            stmt.setString(5, date);
+
+            int rs = stmt.executeUpdate();
+            // Process the result as needed
+        } else {
+            System.out.println("No client found.");
+            JFrame frame = new JFrame();
+            JOptionPane.showMessageDialog(frame, "Client not found", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+String modele = (String) jComboBox1.getSelectedItem();
+String couleur = (String) jComboBox2.getSelectedItem();
+String sql = "SELECT * FROM `voiture` WHERE modele = '" + modele + "' AND couleur = '" + couleur + "'";
+DefaultTableModel jt = null;
+
+try {
+    Connection cnx = Singleton.getconn();
+    Statement stmt = cnx.createStatement();
+    ResultSet rs = stmt.executeQuery(sql);
+    jt = Helper.buildTableModel(rs);
+
+    if (jt.getRowCount() == 0) {
+        System.out.println("No rows found.");
+        JFrame frame = new JFrame();
+        JOptionPane.showMessageDialog(frame, "No cars", "Information", JOptionPane.ERROR_MESSAGE);
+    }
+} catch (SQLException ex) {
+    ex.printStackTrace();
+}
+
+jTable1.setModel(jt);
+// TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
@@ -222,22 +285,40 @@ public class LocationDeVoitureClient extends javax.swing.JFrame {
     }//GEN-LAST:event_jComboBox2ActionPerformed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-         Connection conn =Singleton.getconn() ;
+  Connection conn =Singleton.getconn() ;
         String sql = "SELECT * FROM `voiture` " ;
         try {
             Connection cnx = Singleton.getconn();
             Statement stmt = cnx.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
             stmt=cnx.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
+            
             int cmp = 0;
             while(rs.next()){
                 jComboBox1.addItem(rs.getString(2));
+                jComboBox2.addItem(rs.getString(4));
                 cmp++;
             }
             
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
+        
+        /// table
+            Connection conn2 = Singleton.getconn();
+        String sql2 = "SELECT * FROM `voiture` " ;
+        DefaultTableModel jt =null ;
+        try{
+            PreparedStatement ps =conn2.prepareStatement(sql2) ;
+            ResultSet rs =ps.executeQuery() ;
+            jt= Helper.buildTableModel(rs) ;
+
+        }catch(SQLException ex){
+            ex.printStackTrace();
+        }
+        jTable1.setModel(jt);
+        
     }//GEN-LAST:event_formWindowOpened
 
     /**
@@ -274,6 +355,8 @@ public class LocationDeVoitureClient extends javax.swing.JFrame {
             }
         });
     }
+    public static HashMap idHolder = new HashMap();
+    public static HashMap idHolder2 = new HashMap();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
